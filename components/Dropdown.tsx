@@ -1,4 +1,3 @@
-// components/Dropdown.js
 import { useState } from "react";
 
 export default function Dropdown({ label, options, value, onChange }:any) {
@@ -10,28 +9,24 @@ export default function Dropdown({ label, options, value, onChange }:any) {
   };
 
   return (
-    <div className="relative">
-      <label className="block mb-2">{label}</label>
+    <div className="">
+      <label className="block mb-2 border">{label}</label>
       <div
-        className="w-full p-2 bg-gray-950 text-white rounded cursor-pointer"
+        className="w-full p-2 bg-gray-950 text-white rounded cursor-pointer border"
         onClick={() => setIsOpen(!isOpen)}
       >
         {value || "Select"}
       </div>
       {isOpen && (
-        <div className="absolute w-full mt-1 bg-gray-950 rounded shadow-lg z-10 cursor-pointer">
+        <div className=" w-full mt-1 bg-gray-900 rounded shadow-lg z-10 cursor-pointer">
           {options.map((option:any) => (
-            <>
-           
             <div
               key={option}
-              className="p-2 cursor-pointer hover:bg-red-600 "
+              className="p-2 cursor-pointer hover:bg-red-600"
               onClick={() => handleOptionClick(option)}
             >
-                {option}
+              {option}
             </div>
-           
-            </>
           ))}
         </div>
       )}

@@ -1,45 +1,83 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-import Dropdown from "../../components/Dropdown";
+import Select from "react-select";
+import axios from "axios";
+
 import AirWays from "../../assets/airlogo.png";
 
 export default function Home() {
-  const [origin, setOrigin] = useState("");
-  const [destination, setDestination] = useState("");
-  const [cabin, setCabin] = useState("");
-  const [results, setResults] = useState(null);
-  const [searchParams, setSearchParams] = useState({
-    origin: "",
-    destination: "",
-    cabin: "",
-  });
+  const [origin, setOrigin] = useState<any>(null);
+  const [destination, setDestination] = useState<any>(null);
+  const [cabin, setCabin] = useState<any>(null);
+  const [results, setResults] = useState<any>(null);
 
   const handleSearch = async () => {
-    const response = await fetch("http://localhost:10000/api/search", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(searchParams),
-    });
-    const data = await response.json();
-    setResults(data);
+    try {
+      const response = await axios.post(
+        //@ts-ignore
+        process.env.NEXT_PUBLIC_API_ENDPOINT, {
+        origin: origin?.value,
+        destination: destination?.value,
+        cabin: cabin?.value,
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      setResults(response.data);
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+    }
   };
 
-  const handleSetOrigin = (value:any) => {
-    setOrigin(value);
-    setSearchParams((prev) => ({ ...prev, origin: value }));
-  };
+  const originOptions = [
+    { value: "JFK", label: "JFK" },
+    { value: "DEL", label: "DEL" },
+    { value: "SYD", label: "SYD" },
+    { value: "BOM", label: "BOM" },
+    { value: "BNE", label: "BNE" },
+    { value: "BLR", label: "BLR" },
+  ];
 
-  const handleSetDestination = (value:any) => {
-    setDestination(value);
-    setSearchParams((prev) => ({ ...prev, destination: value }));
-  };
+  const destinationOptions = [
+    { value: "JFK", label: "JFK" },
+    { value: "DEL", label: "DEL" },
+    { value: "SYD", label: "SYD" },
+    { value: "LHR", label: "LHR" },
+    { value: "CDG", label: "CDG" },
+    { value: "DOH", label: "DOH" },
+    { value: "SIN", label: "SIN" },
+  ];
 
-  const handleSetCabin = (value:any) => {
-    setCabin(value);
-    setSearchParams((prev) => ({ ...prev, cabin: value }));
+  const cabinOptions = [
+    { value: "Economy", label: "Economy" },
+    { value: "Business", label: "Business" },
+    { value: "First", label: "First" },
+  ];
+
+  const customStyles = {
+    control: (provided:any) => ({
+      ...provided,
+      backgroundColor: "#1F2937",
+      color: "#FFFFFF",
+      borderRadius: "0.375rem",
+      padding: "0.5rem",
+    }),
+    menu: (provided:any) => ({
+      ...provided,
+      backgroundColor: "#1F2937",
+      color: "#FFFFFF",
+    }),
+    singleValue: (provided:any) => ({
+      ...provided,
+      color: "#FFFFFF",
+    }),
+    option: (provided:any, state:any) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? "#2D3748" : "#1F2937",
+      color: "#FFFFFF",
+    }),
   };
 
   return (
@@ -48,31 +86,31 @@ export default function Home() {
         <h1 className="text-[20px] font-bold mb-4 whitespace-nowrap">
           Choose Origin & Destination Airports:
         </h1>
-
-        <div className="mb-4 cursor-pointer">
-          <Dropdown
-            label="Origin"
-            options={["JFK", "DEL", "SYD", "LHR", "CDG", "DOH", "SIN"]}
+        <div className="mb-4">
+          <label className="block mb-2">Origin</label>
+          <Select
+            styles={customStyles}
+            options={originOptions}
             value={origin}
-            onChange={handleSetOrigin}
+            onChange={setOrigin}
           />
         </div>
-
-        <div className="mb-4 cursor-pointer">
-          <Dropdown
-            label="Destination"
-            options={["JFK", "DEL", "SYD", "LHR", "CDG", "DOH", "SIN"]}
+        <div className="mb-4">
+          <label className="block mb-2">Destination</label>
+          <Select
+            styles={customStyles}
+            options={destinationOptions}
             value={destination}
-            onChange={handleSetDestination}
+            onChange={setDestination}
           />
         </div>
-
-        <div className="mb-4 cursor-pointer">
-          <Dropdown
-            label="Cabin"
-            options={["Economy", "Business", "First"]}
+        <div className="mb-4">
+          <label className="block mb-2">Cabin</label>
+          <Select
+            styles={customStyles}
+            options={cabinOptions}
             value={cabin}
-            onChange={handleSetCabin}
+            onChange={setCabin}
           />
         </div>
         <button
@@ -85,11 +123,7 @@ export default function Home() {
       {results && (
         <div className="p-8 w-full max-w-4xl mt-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        
-            {
-              //@ts-ignore
-            results.data.length > 0 ? (
-              //@ts-ignore
+            {results.data.length > 0 ? (
               results.data.map((result:any, index:any) => (
                 <div key={index} className="bg-green-900 p-4 text-center">
                   <div className="flex justify-center">
@@ -100,43 +134,37 @@ export default function Home() {
                     />
                   </div>
                   <p>
-                    {searchParams.origin} ➔ {searchParams.destination}
+                    {origin?.label} ➔ {destination?.label}
                   </p>
                   <p>
                     {result.departure_time} - {result.return_time}
                   </p>
-
-                  {cabin === "Business" && (
+                  {cabin?.value === "Business" && (
                     <div className="mt-4">
                       <p className="text-lg">
-                        {result.min_business_miles !== null &&
-                        result.min_business_tax !== null
-                          ? `${result.min_business_miles} + $${result.min_business_tax}`
-                          : "N/A"}
+                        {result.min_business_miles === "N/A"
+                          ? "N/A"
+                          : `${result.min_business_miles} + $${result.min_business_tax}`}
                       </p>
                       <p className="text-sm">Min Business Miles</p>
                     </div>
                   )}
-
-                  {cabin === "Economy" && (
+                  {cabin?.value === "Economy" && (
                     <div className="mt-4">
                       <p className="text-lg">
-                        {result.min_economy_miles !== null &&
-                        result.min_economy_tax !== null
-                          ? `${result.min_economy_miles} + $${result.min_economy_tax}`
-                          : "N/A"}
+                        {result.min_economy_miles === "N/A"
+                          ? "N/A"
+                          : `${result.min_economy_miles} + $${result.min_economy_tax}`}
                       </p>
                       <p className="text-sm">Min Economy Miles</p>
                     </div>
                   )}
-
-                  {cabin === "First" && (
+                  {cabin?.value === "First" && (
                     <div className="mt-4">
                       <p className="text-lg">
-                        {result.min_first_miles !== null &&
-                        result.min_first_tax !== null
-                          ? `${result.min_first_miles} + $${result.min_first_tax}`
-                          : "N/A"}
+                        {result.min_first_miles === "N/A"
+                          ? "N/A"
+                          : `${result.min_first_miles} + $${result.min_first_tax}`}
                       </p>
                       <p className="text-sm">Min First Miles</p>
                     </div>
