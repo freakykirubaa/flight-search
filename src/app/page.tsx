@@ -16,7 +16,7 @@ export default function Home() {
   });
 
   const handleSearch = async () => {
-    const response = await fetch("http://localhost:4000/api/search", {
+    const response = await fetch("http://localhost:10000/api/search", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -85,7 +85,11 @@ export default function Home() {
       {results && (
         <div className="p-8 w-full max-w-4xl mt-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {results.data.length > 0 ? (
+        
+            {
+              //@ts-ignore
+            results.data.length > 0 ? (
+              //@ts-ignore
               results.data.map((result:any, index:any) => (
                 <div key={index} className="bg-green-900 p-4 text-center">
                   <div className="flex justify-center">
@@ -101,6 +105,7 @@ export default function Home() {
                   <p>
                     {result.departure_time} - {result.return_time}
                   </p>
+
                   {cabin === "Business" && (
                     <div className="mt-4">
                       <p className="text-lg">
@@ -112,6 +117,7 @@ export default function Home() {
                       <p className="text-sm">Min Business Miles</p>
                     </div>
                   )}
+
                   {cabin === "Economy" && (
                     <div className="mt-4">
                       <p className="text-lg">
@@ -123,6 +129,7 @@ export default function Home() {
                       <p className="text-sm">Min Economy Miles</p>
                     </div>
                   )}
+
                   {cabin === "First" && (
                     <div className="mt-4">
                       <p className="text-lg">
